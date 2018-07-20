@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.2.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
+        
+<!-- start redis配置 -->
+     
+    <!-- redis的连接池pool，不是必选项：timeout/password  -->
+  <!--   <bean id = "jedisPool" class="redis.clients.jedis.JedisPool">
+      <constructor-arg index="0" ref="jedisPoolConfig"/>
+      <constructor-arg index="1" value="${redis.master.host}"/>
+      <constructor-arg index="2" value="${redis.master.port}" type="int"/>
+    <constructor-arg index="3" value="${redis.master.timeout}" type="int"/>
+     <constructor-arg index="4" value="${redis.master.password}"/>
+    </bean> -->
+     
+    <bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool">
+        <constructor-arg index="0" ref="jedisPoolConfig" />
+        <constructor-arg index="1">
+            <list>
+           <!--      <bean class="redis.clients.jedis.JedisShardInfo">
+                    &lt;!&ndash;<constructor-arg index="0" value="${redis.pass.uri0}" />&ndash;&gt;
+                     <constructor-arg index="0" value="${redis.master.host}" />
+                     <constructor-arg index="1" value="${redis.master.port}"
+                                      type="int" />
+                </bean>-->
+                <bean class="redis.clients.jedis.JedisShardInfo">
+                    <!--<constructor-arg index="0" value="${redis.pass.uri1}" />-->
+                    <constructor-arg index="0" value="${redis.slaver.host}" />
+                    <constructor-arg index="1" value="${redis.slaver.port}"
+                                     type="int" />
+                </bean>
+            </list>
+        </constructor-arg>
+    </bean>
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <!-- 控制一个pool可分配多少个jedis实例 -->
+        <property name="maxTotal" value="2048" />
+        <!-- 控制一个pool最多有多少个状态为idle(空闲)的jedis实例 -->
+        <property name="maxIdle" value="200" />
+         
+        <property name="numTestsPerEvictionRun" value="1024" />
+        <property name="timeBetweenEvictionRunsMillis" value="30000" />
+        <property name="minEvictableIdleTimeMillis" value="-1" />
+        <property name="softMinEvictableIdleTimeMillis" value="10000" />
+         
+         <!-- 表示当borrow一个jedis实例时，最大的等待时间，如果超过等待时间，则直接抛出JedisConnectionException --> 
+        <property name="maxWaitMillis" value="1500" />
+        <!-- 在borrow一个jedis实例时，是否提前进行validate操作；如果为true，则得到的jedis实例均是可用的 -->
+        <property name="testOnBorrow" value="true" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnReturn" value="false" />
+        <property name="jmxEnabled" value="true" />
+        <property name="jmxNamePrefix" value="youyuan" />
+        <property name="blockWhenExhausted" value="false" />
+    </bean>
+    <!-- end redis配置 -->
+
+</beans>
